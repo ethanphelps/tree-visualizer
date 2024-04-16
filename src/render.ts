@@ -10,6 +10,7 @@ export class Render {
     nodes: Node[];
     isDragging: boolean;
     newNodeMode: boolean;
+    ctrl: boolean;
     tree: BinaryTree;
 
     constructor() {
@@ -25,6 +26,7 @@ export class Render {
         this.nodes = [new Node(100, 100, 1), new Node(150, 100, 2)];
         this.isDragging = false;
         this.newNodeMode = false;
+        this.ctrl = false;
 
         this.canvas.onmousedown = this.mouseDown.bind(this);
         this.canvas.onmousemove = this.mouseMove.bind(this);
@@ -112,6 +114,12 @@ export class Render {
         if (event.key == "Meta") {
             this.newNodeMode = true;
         }
+        else if (event.key == "Control") {
+            this.ctrl = true;
+        }
+        else if (event.key == "p" && this.ctrl) {
+            this.tree.prettify();
+        }
     }
 
     keyUp(event: KeyboardEvent) {
@@ -119,6 +127,9 @@ export class Render {
         console.log(event);
         if (event.key == "Meta") {
             this.newNodeMode = false;
+        }
+        else if (event.key == "Control") {
+            this.ctrl = false;
         }
     }
 }

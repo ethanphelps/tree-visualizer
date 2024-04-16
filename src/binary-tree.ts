@@ -1,22 +1,27 @@
 import { Node } from "./node";
 import { Utils } from "./utils";
+import { Config } from "./config";
 
 export class BinaryTree {
     context: CanvasRenderingContext2D;
     children: Node[];
     root: Node | undefined;
 
-    constructor(nums: number[]) {
+    constructor(
+        nums: number[], 
+        initialX: number = Config.CANVAS_SIZE / 2, 
+        initialY: number = Config.CANVAS_SIZE / 2
+    ) {
         this.context = Utils.getContext();
         this.children = [];
-        this.buildFromArray(nums);
+        this.buildFromArray(nums, initialX, initialY);
     }
 
     /**
      * Constructs Binary Tree from an array of numbers. Same format as leetcode's array based binary tree test cases.
      * Nums should be a level order traversal w/ null's representing empty spaces on a given level.
      */
-    buildFromArray(nums: number[]) {
+    buildFromArray(nums: number[], initialX: number, initialY: number) {
         if (nums.length == 0) {
             return;
         }
@@ -50,10 +55,37 @@ export class BinaryTree {
     /**
      * Prettifies binary tree based on preset degree ratios.
      * Do a level order traversal and orient on x axis based on distance from center. Or assign each node's children a certain
-     * offset to left and right based on current level
+     * offset to left and right based on current level. Use the position of the root to determine the starting point for the
+     * orientation.
+     * Divide the available space into sections of size
+     * Press Ctrl + p to invoke this function...
+     * TODO: use a real queue for the level order traversal instead of makeshift queue
      */
     prettify() {
-
+        if (!this.root) {
+            console.warn(`Trying to prettify an empty binary tree!`);
+            return;
+        }
+        let i = 0;
+        let level = 0;
+        const queue: (Node | undefined)[] = [];
+        queue.push(this.root);
+        while (i < queue.length) {
+            const levelSize = queue.length - i;
+            const rowSpacing = Config.BINARY_TREE_WIDTH / (levelSize + 1);
+            for (let j = 0; j < levelSize; j++) {
+                if (!queue[i]) {
+                    continue;
+                }
+                console.log(`level: ${level}\tnode: ${queue[i]!.val}\trow spacing: ${rowSpacing}`);
+                queue[i]!.y = level * Config.BINARY_TREE_ROW_HEIGHT;
+                queue[i]!.x = (j + 1) * rowSpacing;
+                queue.push(queue[i]!.left);
+                queue.push(queue[i]!.right);
+                i++;
+            }
+            level++;
+        }
     }
 
     /**

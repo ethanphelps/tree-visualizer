@@ -1,13 +1,12 @@
 import { Render } from "./render";
-
-const SIZE = 500;
+import { Config } from "./config";
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <canvas
         id="treeCanvas"
         class="canvas"
-        width=${SIZE}
-        height=${SIZE}
+        width=${Config.CANVAS_SIZE}
+        height=${Config.CANVAS_SIZE}
       ></canvas>
 `
 
