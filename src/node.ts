@@ -1,3 +1,6 @@
+import { HighlightBounds } from "./highlight-box";
+import { Utils } from "./utils";
+
 const RADIUS = 10;
 
 export class Node {
@@ -9,9 +12,9 @@ export class Node {
     right: Node | undefined;
     parent: Node | undefined
     color: string;
-    canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
     isDragging: boolean;
+    isSelected: boolean;
 
     constructor(
         x: number,
@@ -32,9 +35,9 @@ export class Node {
         this.parent = parent;
         this.color = color;
         this.isDragging = false;
+        this.isSelected = false;
 
-        this.canvas = document.getElementById("treeCanvas") as HTMLCanvasElement;
-        this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+        this.context = Utils.getContext();
 
         this.draw();
     }
@@ -44,7 +47,7 @@ export class Node {
      */
     draw() {
         this.context.beginPath();
-        this.context.fillStyle = "#FFFFFF";
+        this.context.fillStyle = this.color;
         this.context.ellipse(this.x, this.y, this.radius, this.radius, 0, 0, 360);
         this.context.fill();
 
@@ -62,8 +65,27 @@ export class Node {
         const relativeX = mouseX - this.x;
         const relativeY = mouseY - this.y;
         const ellipseValue = ((relativeX ** 2) / (this.radius ** 2)) + ((relativeY ** 2) / (this.radius ** 2));
-        console.log(`Relative X: ${relativeX}, Relative Y: ${relativeY}`);
-        console.log(`click ellipse value: ${ellipseValue}`);
+        // console.log(`Relative X: ${relativeX}, Relative Y: ${relativeY}`);
+        // console.log(`click ellipse value: ${ellipseValue}`);
         return ellipseValue <= 1;
+    }
+
+    /**
+     * Checks if current node resides within the highlight box's bounds
+     * Need to consider all four quadrant orientations of the rectangle... convert based on the width and height
+     * TODO: add more sophisticated highlight checking algorithm that highlights if any pixel of the rectangle covers the node's surface area
+     */
+    highlighted(bounds: HighlightBounds): boolean {
+        const [upperX, upperY, lowerX, lowerY] = bounds;
+        return upperX <= this.x && this.x <= lowerX && upperY <= this.y && this.y <= lowerY;
+    }
+
+    select() {
+        this.isSelected = true;
+        console.log(`Node ${this.val} is selected!`);
+    }
+
+    deselect() {
+        this.isSelected = false;
     }
 }
