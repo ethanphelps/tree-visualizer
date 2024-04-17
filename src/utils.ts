@@ -1,4 +1,5 @@
 import { Node } from "./node";
+import { Config } from "./config";
 
 export class Utils {
 
@@ -15,7 +16,7 @@ export class Utils {
      * TODO: account for divide by zero scenarios
      *
      */
-    static connect(node1: Node, node2: Node) {
+    static connect(node1: Node, node2: Node, color: string = Config.BINARY_TREE_BRANCH_COLOR) {
         if (node2.x < node1.x) {
             let temp = node1;
             node1 = node2;
@@ -28,6 +29,7 @@ export class Utils {
 
         const context = this.getContext();
         context.beginPath();
+        context.strokeStyle = color;
         context.moveTo(a, b);
         context.lineTo(c, d);
         context.stroke();

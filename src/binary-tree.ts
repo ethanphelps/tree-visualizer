@@ -15,6 +15,7 @@ export class BinaryTree {
         this.context = Utils.getContext();
         this.children = [];
         this.buildFromArray(nums, initialX, initialY);
+        this.prettify();
     }
 
     /**
@@ -59,6 +60,7 @@ export class BinaryTree {
      * orientation.
      * Divide the available space into sections of size
      * Press Ctrl + p to invoke this function...
+     * TODO: figure out how to get the spacing mutation to actually work...
      * TODO: use a real queue for the level order traversal instead of makeshift queue
      */
     prettify() {
@@ -70,22 +72,26 @@ export class BinaryTree {
         let level = 0;
         const queue: (Node | undefined)[] = [];
         queue.push(this.root);
-        while (i < queue.length) {
-            const levelSize = queue.length - i;
+        while (queue.length > 0) {
+            const levelSize = queue.length;
             const rowSpacing = Config.BINARY_TREE_WIDTH / (levelSize + 1);
             for (let j = 0; j < levelSize; j++) {
-                if (!queue[i]) {
+                let node = queue.shift();
+                if (!node) {
                     continue;
                 }
-                console.log(`level: ${level}\tnode: ${queue[i]!.val}\trow spacing: ${rowSpacing}`);
-                queue[i]!.y = level * Config.BINARY_TREE_ROW_HEIGHT;
-                queue[i]!.x = (j + 1) * rowSpacing;
-                queue.push(queue[i]!.left);
-                queue.push(queue[i]!.right);
+                console.log(`level: ${level}\tnode: ${node!.val}\trow spacing: ${rowSpacing}`);
+                node.y = level * Config.BINARY_TREE_ROW_HEIGHT + this.root.y;
+                node.x = ((j + 1) * rowSpacing);
+                queue.push(node.left);
+                queue.push(node.right);
                 i++;
             }
             level++;
+            console.log(`queue.length: ${queue.length}`);
+            console.log(`i: ${i}`);
         }
+        console.log("while loop complete!");
     }
 
     /**
