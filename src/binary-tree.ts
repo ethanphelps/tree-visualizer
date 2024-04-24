@@ -1,9 +1,10 @@
 import { Node } from "./node";
 import { Utils } from "./utils";
 import { Config } from "./config";
+import { Drawable } from "./model/Drawable";
+import { Movable } from "./model/movable";
 
-export class BinaryTree {
-    context: CanvasRenderingContext2D;
+export class BinaryTree implements Drawable, Movable {
     children: Node[];
     root: Node | undefined;
 
@@ -12,7 +13,6 @@ export class BinaryTree {
         initialX: number = Config.CANVAS_SIZE / 2, 
         initialY: number = Config.CANVAS_SIZE / 2
     ) {
-        this.context = Utils.getContext();
         this.children = [];
         this.buildFromArray(nums, initialX, initialY);
         this.prettify();
@@ -107,5 +107,12 @@ export class BinaryTree {
                 Utils.connect(node, node.right);
             }
         }
+    }
+
+    /**
+     * TODO: implement to move all nodes + lines
+     */
+    move(x: number, y: number) {
+
     }
 }

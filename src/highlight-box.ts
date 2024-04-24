@@ -1,5 +1,5 @@
 import { Config } from "./config";
-import { Utils } from "./utils";
+import { context } from "./main";
 
 export type HighlightBounds = [number, number, number, number];
 
@@ -9,7 +9,6 @@ export class HighlightBox {
     mouseX: number;
     mouseY: number;
     color: string;
-    context: CanvasRenderingContext2D;
     isDragging: boolean;
 
     constructor(
@@ -25,7 +24,6 @@ export class HighlightBox {
         this.mouseY = mouseY;
         this.color = color;
         this.isDragging = false;
-        this.context = Utils.getContext();
 
         this.draw();
     }
@@ -36,11 +34,11 @@ export class HighlightBox {
      * Need to handle all four quadrants for mouse position relative to initial click position.
      */
     draw() {
-        this.context.beginPath();
-        this.context.fillStyle = Config.HIGHLIGHT_COLOR;
-        this.context.fillRect(this.x, this.y, this.mouseX - this.x, this.mouseY - this.y);
-        this.context.strokeStyle = Config.HIGHLIGHT_BORDER;
-        this.context.strokeRect(this.x, this.y, this.mouseX - this.x, this.mouseY - this.y);
+        context.beginPath();
+        context.fillStyle = Config.HIGHLIGHT_COLOR;
+        context.fillRect(this.x, this.y, this.mouseX - this.x, this.mouseY - this.y);
+        context.strokeStyle = Config.HIGHLIGHT_BORDER;
+        context.strokeRect(this.x, this.y, this.mouseX - this.x, this.mouseY - this.y);
     }
 
     updateMouseCoordinates(mouseX: number, mouseY: number) {
@@ -50,10 +48,21 @@ export class HighlightBox {
 
     /**
      * Return top left corner and bottom right corner based on current orientation.
-     * TODO: Make these values accurate! Take into account which quadrant the mouse is in (see ipad drawing)
+     * Takes into account which quadrant the mouse is in (see ipad drawing)
      */
     getBounds(): HighlightBounds  {
-        return [this.x, this.y, this.mouseX - this.x, this.mouseY - this.y];
+        if (this.mouseX >= this.x) {
+            if (this.mouseY >= this.y) {
+                return [this.x, this.y, this.mouseX, this.mouseY];
+            }
+            return [this.x, this.mouseY, this.mouseX, this.y];
+        } 
+        else {
+            if (this.mouseY >= this.y) {
+                return [this.mouseX, this.y, this.x, this.mouseY];
+            }
+            return [this.mouseX, this.mouseY, this.x, this.y];
+        }
     }
 
 }

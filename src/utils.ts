@@ -1,12 +1,9 @@
 import { Node } from "./node";
 import { Config } from "./config";
+import { context } from "./main";
 
 export class Utils {
 
-    static getContext(): CanvasRenderingContext2D {
-        const canvas = document.getElementById("treeCanvas") as HTMLCanvasElement;
-        return canvas.getContext("2d") as CanvasRenderingContext2D;
-    }
 
     /**
      * Draws a line between two nodes. Calculates point on circumference of each node to attach to based on trigonometry
@@ -27,7 +24,6 @@ export class Utils {
             ? this.downTo(node1, node2)
             : this.upTo(node1, node2);
 
-        const context = this.getContext();
         context.beginPath();
         context.strokeStyle = color;
         context.moveTo(a, b);
@@ -91,7 +87,21 @@ export class Utils {
      */
     static canvasCoordinates(mouseX: number, mouseY: number) {
         const canvasRect = document.getElementById("treeCanvas")?.getBoundingClientRect() as DOMRect;
-        return [mouseX - canvasRect.left + window.scrollX, mouseY - canvasRect.top + window.scrollY];
+        // return [mouseX - canvasRect.left + window.scrollX, mouseY - canvasRect.top + window.scrollY];
+        return [mouseX - canvasRect.left, mouseY - canvasRect.top];
+    }
+
+    static debugRect(upperX: number, upperY: number, lowerX: number, lowerY: number) {
+        context.beginPath();
+        context.fillStyle = "purple";
+        context.fillRect(upperX, upperY, lowerX - upperX, lowerY - upperY);
+        // context.strokeStyle = Config.HIGHLIGHT_BORDER;
+        // context.strokeRect(upperX, upperY, lowerX - upperX, lowerY - upperY);
+        // console.log(`upperX: ${upperX}, upperY: ${upperY}, lowerX: ${lowerX}, lowerY: ${lowerY}`);
+
+        // context.beginPath();
+        // context.fillStyle = "purple";
+        // context.fillRect(400, 500, -50, -50);
     }
 
 }

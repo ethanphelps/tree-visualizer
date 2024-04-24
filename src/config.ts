@@ -5,4 +5,6 @@ export const Config = {
     BINARY_TREE_BRANCH_COLOR: "#FFFFFF",
     HIGHLIGHT_COLOR: "#97dcff47",
     HIGHLIGHT_BORDER: "#97dcff",
+    NODE_HIGHLIGHT_COLOR: "#81fbff",
+    DEFAULT_COLOR: "#FFFFFF"
 } as const;

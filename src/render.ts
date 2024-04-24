@@ -2,25 +2,27 @@ import { Node } from "./node";
 import { Utils } from "./utils";
 import { BinaryTree } from "./binary-tree";
 import { HighlightBox } from "./highlight-box";
-import { MouseMoveMode, MouseMoveModes } from "./modes";
+import { EditMode, MouseMoveMode, MouseMoveModes } from "./modes";
+import { canvas, context } from "./main";
+import { HighlightGroup } from "./highlight-group";
 
+
+/**
+ * TODO: consolidate the logic that loops over nodes from different structures in the mouse/key event handlers
+ */
 export class Render {
     canvas: HTMLCanvasElement;
-    context: CanvasRenderingContext2D;
-    // node: Node;
-    // otherNode: Node;
     nodes: Node[];
     newNodeMode: boolean;
     mouseMoveMode: MouseMoveMode;
     highlightBox: HighlightBox | null;
+    highlightGroup: HighlightGroup;
     ctrl: boolean;
     tree: BinaryTree;
 
     constructor() {
-        this.canvas = document.getElementById("treeCanvas") as HTMLCanvasElement;
-        this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+        this.canvas = canvas;
 
-        // this.nodes = [new Node(100, 100, 1), new Node(150, 100, 2)];
         this.nodes = [];
         this.newNodeMode = false;
         this.mouseMoveMode = MouseMoveModes.NONE;
@@ -36,13 +38,18 @@ export class Render {
         // this.tree = new BinaryTree([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
 
         this.highlightBox = null;
+        this.highlightGroup = new HighlightGroup();
 
         this.loop(0);
     }
 
+    setEditorMode(mode: EditMode) {
+
+    }
+
     loop(now: DOMHighResTimeStamp) {
         //clear the canvas every frame
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // loop over all nodes and update
         for (let i = 0; i < this.nodes.length; i++) {
@@ -64,6 +71,8 @@ export class Render {
         event.preventDefault();
         const [canvasX, canvasY] = Utils.canvasCoordinates(event.clientX, event.clientY);
         if (this.backgroundClick(canvasX, canvasY)) {
+            // this.deselectAll();
+            this.highlightGroup.clear();
             if (this.newNodeMode) {
                 this.nodes.push(new Node(canvasX, canvasY, this.nodes.length + 1));
                 return;
@@ -95,14 +104,24 @@ export class Render {
             case MouseMoveModes.DRAG_MODE: {
                 for (const node of this.nodes) {
                     if (node.isDragging) {
-                        node.x = canvasX;
-                        node.y = canvasY;
+                        // node.x = canvasX;
+                        // node.y = canvasY;
+                        if (this.highlightGroup.contains(node)) {
+                            this.highlightGroup.move(canvasX - node.x, canvasY - node.y);
+                        } else {
+                            node.moveAbsolute(canvasX, canvasY);
+                        }
                     }
                 }
                 for (const node of this.tree.children) {
                     if (node.isDragging) {
-                        node.x = canvasX;
-                        node.y = canvasY;
+                        // node.x = canvasX;
+                        // node.y = canvasY;
+                        if (this.highlightGroup.contains(node)) {
+                            this.highlightGroup.move(canvasX - node.x, canvasY - node.y);
+                        } else {
+                            node.moveAbsolute(canvasX, canvasY);
+                        }
                     }
                 }
                 break;
@@ -115,13 +134,22 @@ export class Render {
                 const bounds = this.highlightBox.getBounds();
                 for (const node of this.nodes) {
                     if (node.highlighted(bounds)) {
-                        node.select();
+                        // node.select();
+                        this.highlightGroup.add(node);
+                    } else if (node.isSelected) {
+                        // node.deselect();
+                        this.highlightGroup.remove(node);
                     }
                 }
                 for (const node of this.tree.children) {
                     if (node.highlighted(bounds)) {
-                        node.select();
+                        // node.select();
+                        this.highlightGroup.add(node);
+                    } else if (node.isSelected) {
+                        // node.deselect();
+                        this.highlightGroup.remove(node);
                     }
+
                 }
             }
         }
@@ -133,11 +161,9 @@ export class Render {
         this.highlightBox = null;
         for (const node of this.nodes) {
             node.isDragging = false;
-            node.deselect();
         }
         for (const node of this.tree.children) {
             node.isDragging = false;
-            node.deselect();
         }
     }
 
@@ -157,7 +183,6 @@ export class Render {
 
     keyUp(event: KeyboardEvent) {
         event.preventDefault();
-        console.log(event);
         if (event.key == "Meta") {
             this.newNodeMode = false;
         }
@@ -178,5 +203,14 @@ export class Render {
             }
         }
         return true;
+    }
+
+    deselectAll() {
+        for (const node of this.nodes) {
+            node.deselect();
+        }
+        for (const node of this.tree.children) {
+            node.deselect();
+        }
     }
 }

@@ -1,9 +1,12 @@
+import { Config } from "./config";
 import { HighlightBounds } from "./highlight-box";
-import { Utils } from "./utils";
+import { context } from "./main";
+import { Drawable } from "./model/Drawable";
 
 const RADIUS = 10;
 
-export class Node {
+// TODO: add hover feature to create new outgoing line on circumference
+export class Node implements Drawable {
     x: number;
     y: number;
     radius: number;
@@ -12,7 +15,6 @@ export class Node {
     right: Node | undefined;
     parent: Node | undefined
     color: string;
-    context: CanvasRenderingContext2D;
     isDragging: boolean;
     isSelected: boolean;
 
@@ -37,8 +39,6 @@ export class Node {
         this.isDragging = false;
         this.isSelected = false;
 
-        this.context = Utils.getContext();
-
         this.draw();
     }
 
@@ -46,16 +46,16 @@ export class Node {
      * Draws circle representing node and writes value on top of the node
      */
     draw() {
-        this.context.beginPath();
-        this.context.fillStyle = this.color;
-        this.context.ellipse(this.x, this.y, this.radius, this.radius, 0, 0, 360);
-        this.context.fill();
+        context.beginPath();
+        context.fillStyle = this.isSelected ? Config.NODE_HIGHLIGHT_COLOR : this.color;
+        context.ellipse(this.x, this.y, this.radius, this.radius, 0, 0, 360);
+        context.fill();
 
-        this.context.beginPath();
-        this.context.textAlign = "center";
-        this.context.textBaseline = "middle";
-        this.context.fillStyle = "#1b4c20";
-        this.context.fillText(JSON.stringify(this.val), this.x, this.y);
+        context.beginPath();
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillStyle = "#1b4c20";
+        context.fillText(JSON.stringify(this.val), this.x, this.y);
     }
 
     /**
@@ -82,10 +82,25 @@ export class Node {
 
     select() {
         this.isSelected = true;
-        console.log(`Node ${this.val} is selected!`);
     }
 
     deselect() {
         this.isSelected = false;
+    }
+
+    /**
+     * Moves node relative to some change in x and y
+     */
+    move(deltaX: number, deltaY: number) {
+        this.x += deltaX;
+        this.y += deltaY;
+    }
+    
+    /**
+     * Moves node to an absolute x,y coordinate
+     */
+    moveAbsolute(x: number, y: number) {
+        this.x = x;
+        this.y = y;
     }
 }
